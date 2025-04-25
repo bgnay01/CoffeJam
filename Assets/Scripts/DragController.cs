@@ -2,8 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-
-[RequireComponent(typeof(Rigidbody), typeof(Collider))]
 public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     private Rigidbody rb;
@@ -13,9 +11,8 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
     private bool isDragging;
 
     [Header("Sürükleme Ayarları")]
-    [SerializeField] private float liftHeight = 0.5f;
-    [SerializeField] private float dragForce = 20f;
-    [SerializeField] private LayerMask collisionLayer;
+    [SerializeField] private float liftHeight = 0.1f;
+    [SerializeField] private float dragForce = 5f;
 
     [Header("Snap Ayarları")]
     [SerializeField] private float snapDistance = 1.0f;
@@ -41,7 +38,7 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
         rb.isKinematic = false;
         rb.useGravity = false;
         rb.linearVelocity = Vector3.zero;
-        transform.position += Vector3.up * liftHeight;
+        transform.position = new Vector3(transform.position.x, liftHeight, transform.position.z);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -51,16 +48,10 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
         Vector3 targetPosition = GetInputWorldPos() + offset;
         targetPosition.y = transform.position.y;
 
-        // Çarpışma kontrolü ile velocity hesaplama
-        if (CanMoveTo(targetPosition))
-        {
-            Vector3 forceDirection = (targetPosition - transform.position);
-            rb.linearVelocity = forceDirection * dragForce;
-        }
-        else
-        {
-            rb.linearVelocity *= 0.5f; // Engel varsa yavaşlat
-        }
+        Vector3 forceDirection = targetPosition - transform.position;
+        rb.linearVelocity = forceDirection * dragForce;
+
+
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -81,23 +72,6 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
         return cam.ScreenToWorldPoint(inputPos);
     }
 
-    private bool CanMoveTo(Vector3 targetPosition)
-    {
-        // 3D OverlapBox ile çarpışma kontrolü
-        Collider[] colliders = Physics.OverlapBox(
-            targetPosition,
-            GetComponent<Collider>().bounds.extents * 0.9f,
-            Quaternion.identity,
-            collisionLayer
-        );
-
-        foreach (Collider col in colliders)
-        {
-            if (col.gameObject != gameObject && !col.CompareTag("Tile"))
-                return false;
-        }
-        return true;
-    }
 
     private IEnumerator SmoothSnap()
     {
