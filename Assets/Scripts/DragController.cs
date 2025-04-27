@@ -29,7 +29,6 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
         startPosition = transform.position;
         rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         isDragging = true;
@@ -53,7 +52,13 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
 
 
     }
-
+    void Update()
+    {
+        if (!isDragging && gameObject.transform.position.y != 0)
+        {
+            gameObject.transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
+        }
+    }
     public void OnEndDrag(PointerEventData eventData)
     {
         isDragging = false;
