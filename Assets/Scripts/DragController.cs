@@ -27,7 +27,10 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
         rb = GetComponent<Rigidbody>();
         cam = Camera.main;
         startPosition = transform.position;
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
+    }
+    void Start()
+    {
+        StartCoroutine(SmoothSnap());
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
