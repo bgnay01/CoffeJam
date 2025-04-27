@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     public void ChangeLevel()
     {
         int x = playGrounds.FindInstanceID(currentPlayground);
-        x = (x + 1) % 3;
+        x = (x + 1) % 2;
         SwitchPlayground(x);
     }
 

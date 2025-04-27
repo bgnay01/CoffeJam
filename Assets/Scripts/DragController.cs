@@ -36,7 +36,7 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
     {
         isDragging = true;
         zCoord = cam.WorldToScreenPoint(transform.position).z;
-        offset = transform.position - GetInputWorldPos();
+        offset = transform.position - GetInputWorldPos(eventData.position);
         rb.isKinematic = false;
         rb.useGravity = false;
         rb.linearVelocity = Vector3.zero;
@@ -47,7 +47,7 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
     {
         if (!isDragging) return;
 
-        Vector3 targetPosition = GetInputWorldPos() + offset;
+        Vector3 targetPosition = GetInputWorldPos(eventData.position) + offset;
         targetPosition.y = transform.position.y;
 
         Vector3 forceDirection = targetPosition - transform.position;
@@ -70,13 +70,9 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
         StartCoroutine(SmoothSnap());
     }
 
-    private Vector3 GetInputWorldPos()
+    private Vector3 GetInputWorldPos(Vector2 pointerPosition)
     {
-        Vector3 inputPos = Input.touchCount > 0 ?
-            Input.GetTouch(0).position :
-            Input.mousePosition;
-
-        inputPos.z = zCoord;
+        Vector3 inputPos = new Vector3(pointerPosition.x, pointerPosition.y, zCoord);
         return cam.ScreenToWorldPoint(inputPos);
     }
 
@@ -99,7 +95,11 @@ public class PhysicsDragController : MonoBehaviour, IBeginDragHandler, IDragHand
         }
 
         // Final adjustment
-        rb.linearVelocity = Vector3.zero;
+        if (!rb.isKinematic)
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
+
         transform.position = new Vector3(nearestPos.x, 0, nearestPos.z);
     }
 
